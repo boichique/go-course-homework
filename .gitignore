@@ -1,0 +1,4 @@
+.idea
+
+# all bin directories recursively
+**/bin

@@ -1,0 +1,15 @@
+reasoning: 11
+science: 11
+scientific: 10
+based: 6
+inductive: 6
+method: 6
+problem: 6
+thinking: 6
+deductive: 5
+logical: 5
+observation: 5
+specific: 5
+brain: 4
+descriptive: 4
+general: 4
