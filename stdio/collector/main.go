@@ -24,7 +24,12 @@ func main() {
 	min, max := noMin, noMax
 	sum := 0
 	counter := 0
-	r := fmt.Sprintf("[%d:%d]", min, max)
+	rangeChanged := false
+
+	// handler scanner error
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+	}
 
 	for scanner.Scan() {
 		var metric int //   parse line
@@ -36,26 +41,22 @@ func main() {
 
 		if metric < min { //   update stats
 			min = metric
+			rangeChanged = true
 		}
 		if metric > max {
 			max = metric
+			rangeChanged = true
 		}
 		counter++
 		sum += metric
 
-		if metric == max || metric == min { //   update range and print if changed
-			r = fmt.Sprintf("[%d:%d]", min, max)
-			fmt.Fprintf(os.Stdout, "New range: %s\n", r)
-		}
-
-		// handler scanner error
-		if err := scanner.Err(); err != nil {
-			fmt.Fprintln(os.Stderr, "reading standard input:", err)
+		if rangeChanged { //   update range and print if changed
+			fmt.Fprintf(os.Stdout, "New range: [%d:%d]\n", min, max)
+			rangeChanged = false
 		}
 	}
 
 	// print final stats
-	avg := fmt.Sprintf("%.2f", float64(sum)/float64(counter))
-	fmt.Fprintf(os.Stdout, "Stats: metrics collected: %d in range %s with avg: %s\n", counter, r, avg)
+	fmt.Fprintf(os.Stdout, "Stats: metrics collected: %d in range [%d:%d] with avg: %s\n", counter, min, max, fmt.Sprintf("%.2f", float64(sum)/float64(counter)))
 
 }

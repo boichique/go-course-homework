@@ -16,10 +16,12 @@ const (
 
 func main() {
 	// flag vars
-	var interval time.Duration
-	var duration time.Duration
-	var from int
-	var to int
+	var (
+		interval time.Duration
+		duration time.Duration
+		from     int
+		to       int
+	)
 
 	// define and parse flags
 	flag.DurationVar(&interval, "i", 100*time.Millisecond, "Interval for generation")
@@ -39,14 +41,14 @@ func main() {
 	//   generate metrics
 	// {
 	for t := time.Now(); time.Since(t) < duration; time.Sleep(interval) {
-		fmt.Printf("metric: %d\n", (generator.Intn(to-from) + from))
+		fmt.Printf("metric: %d\n", generator.Intn(to-from)+from)
 	}
 }
 
 func getRandGenerator() (*rand.Rand, error) {
 	seed, ok := os.LookupEnv(seedEnvVar)
 	if !ok {
-		return nil, fmt.Errorf("missing environment variable: %s", seedEnvVar)
+		seed = strconv.Itoa(int(time.Now().UnixNano()))
 	}
 
 	seedInt, err := strconv.Atoi(seed)
