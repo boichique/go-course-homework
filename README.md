@@ -8,3 +8,6 @@
 * [files](files) - работа с файлами
 * [stdio](stdio) - работа со стандартными потоками ввода/вывода
 * [filehashes](filehashes) - работа с файловой системой, использование интерфейсов для тестирования
+* [wordscount](wordscount) - работа с многопоточной обработкой данных
+* [watchcmd](watchcmd) - работа с сигналами, использование time.Ticker и context.Context
+* [tcp-guessgame](tcp-guessgame) - работа с TCP
