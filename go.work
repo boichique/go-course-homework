@@ -1,0 +1,13 @@
+go 1.20
+
+use (
+	./filehashes
+	./files
+	./http-booklibrary
+	./http-userroles
+	./sql-querier
+	./stdio
+	./tcp-guessgame
+	./watchcmd
+	./wordscount
+)
