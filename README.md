@@ -16,3 +16,4 @@
 * [http-booklibrary](http-booklibrary) - работа с пакетом `net/http`
 * [http-userroles](http-userroles) - работа с Unix Domain Socket, `boltdb/bolt`, `labstack/echo`, `spf13/cobra`, `go-resty/resty`
 * [sql-querier](sql-querier) - работа с `database/sql`, написание простых sql запросов
+* [http-userroles: follow-up 1](http-userroles) - работа со `swaggo`. Генерация OpenAPI спецификации

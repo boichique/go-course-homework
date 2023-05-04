@@ -26,7 +26,7 @@ type Store struct {
 }
 
 func NewStore(filePath string) (*Store, error) {
-	db, err := bolt.Open(filePath, 0600, nil)
+	db, err := bolt.Open(filePath, 0o600, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -76,13 +76,11 @@ func (s *Store) GetUsers() ([]*contracts.User, error) {
 			return nil
 		})
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf("unable to get users: %w", err)
 	}
 
 	return sortUsers(users), nil
-
 }
 
 func (s *Store) GetUser(email string) (*contracts.User, error) {
@@ -96,13 +94,11 @@ func (s *Store) GetUser(email string) (*contracts.User, error) {
 		}
 		return json.Unmarshal(v, &user)
 	})
-
 	if err != nil {
 		return nil, err
 	}
 
 	return user, nil
-
 }
 
 func (s *Store) GetUsersByRole(role string) ([]*contracts.User, error) {
@@ -131,7 +127,6 @@ func (s *Store) GetUsersByRole(role string) ([]*contracts.User, error) {
 			return nil
 		})
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf("error getting users by role %q: %w", role, err)
 	}

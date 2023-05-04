@@ -1,0 +1,180 @@
+definitions:
+  contracts.User:
+    properties:
+      email:
+        description: unique key
+        type: string
+      full_name:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+    type: object
+  echo.HTTPError:
+    properties:
+      message: {}
+    type: object
+info:
+  contact: {}
+paths:
+  /api/users:
+    get:
+      consumes:
+      - application/json
+      description: Returns all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contracts.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Returns all users
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user
+      parameters:
+      - description: User object that needs to be created
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Creates a new user
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing user
+      parameters:
+      - description: User object that needs to be updated
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Updates an existing user
+  /api/users/{email}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a user by email
+      parameters:
+      - description: Email of the user
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Deletes a user by email
+    get:
+      consumes:
+      - application/json
+      description: Returns a user by email
+      parameters:
+      - description: Email of the user
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contracts.User'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Returns a user by email
+  /api/users/roles/{role}:
+    get:
+      consumes:
+      - application/json
+      description: Returns all users with the given role
+      parameters:
+      - description: Role of the user
+        in: path
+        name: role
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/contracts.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Returns all users with the given role
+swagger: "2.0"

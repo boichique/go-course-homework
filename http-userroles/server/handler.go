@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/cloudmachinery/apps/http-userroles/contracts"
+	_ "github.com/cloudmachinery/apps/http-userroles/server/docs"
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,6 +28,13 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	usersGroup.DELETE("/:email", h.handleDeleteUser)
 }
 
+//	@Summary		Returns all users
+//	@Description	Returns all users
+//	@Router			/api/users [get]
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	contracts.User
+//	@Failure		500	{object}	echo.HTTPError
 func (h *Handler) handleGetAllUsers(c echo.Context) error {
 	users, err := h.store.GetUsers()
 	if err != nil {
@@ -36,6 +44,15 @@ func (h *Handler) handleGetAllUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+//	@Summary		Returns a user by email
+//	@Description	Returns a user by email
+//	@Router			/api/users/{email} [get]
+//	@Accept			json
+//	@Produce		json
+//	@Param			email	path		string	true	"Email of the user"
+//	@Success		200		{object}	contracts.User
+//	@Failure		404		{object}	echo.HTTPError
+//	@Failure		500		{object}	echo.HTTPError
 func (h *Handler) handleGetUserByEmail(c echo.Context) error {
 	email := c.Param("email")
 
@@ -54,6 +71,15 @@ func (h *Handler) handleGetUserByEmail(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+//	@Summary		Returns all users with the given role
+//	@Description	Returns all users with the given role
+//	@Router			/api/users/roles/{role} [get]
+//	@Accept			json
+//	@Produce		json
+//	@Param			role	path		string	true	"Role of the user"
+//	@Success		200		{array}		contracts.User
+//	@Failure		400		{object}	echo.HTTPError
+//	@Failure		500		{object}	echo.HTTPError
 func (h *Handler) handleGetUsersByRole(c echo.Context) error {
 	role := c.Param("role")
 	if role == "" {
@@ -68,6 +94,16 @@ func (h *Handler) handleGetUsersByRole(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+//	@Summary		Creates a new user
+//	@Description	Creates a new user
+//	@Router			/api/users [post]
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body	contracts.User	true	"User object that needs to be created"
+//	@Success		201
+//	@Failure		400	{object}	echo.HTTPError
+//	@Failure		409	{object}	echo.HTTPError
+//	@Failure		500	{object}	echo.HTTPError
 func (h *Handler) handleCreateUser(c echo.Context) error {
 	var user *contracts.User
 
@@ -91,6 +127,16 @@ func (h *Handler) handleCreateUser(c echo.Context) error {
 	}
 }
 
+//	@Summary		Updates an existing user
+//	@Description	Updates an existing user
+//	@Router			/api/users [put]
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body	contracts.User	true	"User object that needs to be updated"
+//	@Success		200
+//	@Failure		400	{object}	echo.HTTPError
+//	@Failure		404	{object}	echo.HTTPError
+//	@Failure		500	{object}	echo.HTTPError
 func (h *Handler) handleUpdateUser(c echo.Context) error {
 	var user *contracts.User
 
@@ -113,6 +159,16 @@ func (h *Handler) handleUpdateUser(c echo.Context) error {
 	}
 }
 
+//	@Summary		Deletes a user by email
+//	@Description	Deletes a user by email
+//	@Router			/api/users/{email} [delete]
+//	@Accept			json
+//	@Produce		json
+//	@Param			email	path	string	true	"Email of the user"
+//	@Success		200
+//	@Failure		400	{object}	echo.HTTPError
+//	@Failure		404	{object}	echo.HTTPError
+//	@Failure		500	{object}	echo.HTTPError
 func (h *Handler) handleDeleteUser(c echo.Context) error {
 	email := c.Param("email")
 
