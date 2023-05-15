@@ -2,17 +2,19 @@ package main
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/cloudmachinery/apps/http-userroles/contracts"
 	_ "github.com/cloudmachinery/apps/http-userroles/server/docs"
+	"github.com/cloudmachinery/apps/http-userroles/server/store"
 	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
-	store *Store
+	store store.Store
 }
 
-func NewHandler(store *Store) *Handler {
+func NewHandler(store store.Store) *Handler {
 	return &Handler{
 		store: store,
 	}
@@ -36,7 +38,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 //	@Success		200	{object}	contracts.User
 //	@Failure		500	{object}	echo.HTTPError
 func (h *Handler) handleGetAllUsers(c echo.Context) error {
-	users, err := h.store.GetUsers()
+	users, err := h.store.GetUsers(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -55,14 +57,18 @@ func (h *Handler) handleGetAllUsers(c echo.Context) error {
 //	@Failure		500		{object}	echo.HTTPError
 func (h *Handler) handleGetUserByEmail(c echo.Context) error {
 	email := c.Param("email")
+	email, err := url.QueryUnescape(email)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
 
 	if email == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "email is required")
 	}
 
-	user, err := h.store.GetUser(email)
+	user, err := h.store.GetUser(c.Request().Context(), email)
 	if err != nil {
-		if err == ErrUserNotFound {
+		if err == store.ErrUserNotFound {
 			return echo.NewHTTPError(http.StatusNotFound, "user not found")
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -86,7 +92,7 @@ func (h *Handler) handleGetUsersByRole(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "role is required")
 	}
 
-	users, err := h.store.GetUsersByRole(role)
+	users, err := h.store.GetUsersByRole(c.Request().Context(), role)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -115,10 +121,10 @@ func (h *Handler) handleCreateUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "email is required")
 	}
 
-	err := h.store.CreateUser(user)
+	err := h.store.CreateUser(c.Request().Context(), user)
 
 	switch err {
-	case ErrUserAlreadyExists:
+	case store.ErrUserAlreadyExists:
 		return echo.NewHTTPError(http.StatusConflict, "user already exists")
 	case nil:
 		return c.NoContent(http.StatusCreated)
@@ -140,17 +146,18 @@ func (h *Handler) handleCreateUser(c echo.Context) error {
 func (h *Handler) handleUpdateUser(c echo.Context) error {
 	var user *contracts.User
 
+	if err := c.Bind(&user); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
 	if user.Email == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "email is required")
 	}
 
-	if err := c.Bind(&user); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	err := h.store.UpdateUser(user)
+	err := h.store.UpdateUser(c.Request().Context(), user)
 
 	switch err {
-	case ErrUserNotFound:
+	case store.ErrUserNotFound:
 		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	case nil:
 		return c.NoContent(http.StatusOK)
@@ -171,15 +178,19 @@ func (h *Handler) handleUpdateUser(c echo.Context) error {
 //	@Failure		500	{object}	echo.HTTPError
 func (h *Handler) handleDeleteUser(c echo.Context) error {
 	email := c.Param("email")
+	email, err := url.QueryUnescape(email)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
 
 	if email == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "email is required")
 	}
 
-	err := h.store.DeleteUser(email)
+	err = h.store.DeleteUser(c.Request().Context(), email)
 
 	switch err {
-	case ErrUserNotFound:
+	case store.ErrUserNotFound:
 		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	case nil:
 		return c.NoContent(http.StatusOK)

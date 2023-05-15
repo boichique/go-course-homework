@@ -15,13 +15,26 @@ type Client struct {
 	baseURL string
 }
 
-func NewClient(sockAddr string) *Client {
-	hc := &http.Client{
-		Transport: &http.Transport{
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				return net.Dial("unix", sockAddr)
+func NewClient(network, addr string) (*Client, error) {
+	var (
+		hc      = &http.Client{}
+		baseURL string
+	)
+
+	switch network {
+	case "unix":
+		hc = &http.Client{
+			Transport: &http.Transport{
+				DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+					return net.Dial("unix", addr)
+				},
 			},
-		},
+		}
+		baseURL = "http://unix/api/users"
+	case "tcp":
+		baseURL = fmt.Sprintf("http://%s/api/users", addr)
+	default:
+		return nil, fmt.Errorf("unsupported network type %s", network)
 	}
 
 	rc := resty.NewWithClient(hc)
@@ -34,8 +47,8 @@ func NewClient(sockAddr string) *Client {
 
 	return &Client{
 		client:  rc,
-		baseURL: "http://unix/api/users",
-	}
+		baseURL: baseURL,
+	}, nil
 }
 
 func (c *Client) GetAllUsers() ([]*contracts.User, error) {
@@ -44,7 +57,6 @@ func (c *Client) GetAllUsers() ([]*contracts.User, error) {
 	_, err := c.client.R().
 		SetResult(&users).
 		Get(c.baseURL)
-
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +70,6 @@ func (c *Client) GetUserByEmail(email string) (*contracts.User, error) {
 	_, err := c.client.R().
 		SetResult(&user).
 		Get(fmt.Sprintf("%s/%s", c.baseURL, email))
-
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +83,6 @@ func (c *Client) GetUsersByRole(role string) ([]*contracts.User, error) {
 	_, err := c.client.R().
 		SetResult(&users).
 		Get(fmt.Sprintf("%s/roles/%s", c.baseURL, role))
-
 	if err != nil {
 		return nil, err
 	}

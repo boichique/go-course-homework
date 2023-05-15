@@ -1,4 +1,10 @@
 .idea
+.dockerignore
 
-# all bin directories recursively
+# all bin and profiles directories recursively
 **/bin
+**/profiles
+**/config
+
+# all files that end with .boltdb recursively: they are just db files that should not be in git
+**/*.boltdb

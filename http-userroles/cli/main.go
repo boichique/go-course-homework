@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -11,25 +12,39 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const sockAddr = "/tmp/http-userroles.sock"
+var (
+	sockAddr = "/tmp/http-userroles.sock"
+	connType string
+	address  string
+)
 
 func main() {
-	client := NewClient(sockAddr)
-
 	root := &cobra.Command{
 		Use:          "userroles-cli",
 		SilenceUsage: true,
 	}
 
-	root.AddCommand(getCommand(client))
-	root.AddCommand(createCommand(client))
-	root.AddCommand(updateCommand(client))
-	root.AddCommand(deleteCommand(client))
+	root.PersistentFlags().StringVarP(&address, "addr", "a", sockAddr, "Address to connect to DB")
+	root.PersistentFlags().StringVarP(&connType, "conn-type", "t", "unix", "Connection type (tcp or unix)")
+
+	root.AddCommand(getCommand())
+	root.AddCommand(createCommand())
+	root.AddCommand(updateCommand())
+	root.AddCommand(deleteCommand())
 
 	_ = root.Execute()
 }
 
-func getCommand(client *Client) *cobra.Command {
+func getClient() *Client {
+	client, err := NewClient(connType, address)
+	if err != nil {
+		log.Fatalf("error creating client: %s", err)
+	}
+
+	return client
+}
+
+func getCommand() *cobra.Command {
 	var email, role string
 
 	cmd := &cobra.Command{
@@ -39,6 +54,7 @@ func getCommand(client *Client) *cobra.Command {
 				users []*contracts.User
 				err   error
 			)
+			client := getClient()
 
 			switch {
 			case email != "" && role != "":
@@ -70,12 +86,14 @@ func getCommand(client *Client) *cobra.Command {
 	return cmd
 }
 
-func createCommand(client *Client) *cobra.Command {
+func createCommand() *cobra.Command {
 	var user contracts.User
 
 	cmd := &cobra.Command{
 		Use: "create",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			client := getClient()
+
 			if err := client.CreateUser(&user); err != nil {
 				return err
 			}
@@ -102,12 +120,14 @@ func createCommand(client *Client) *cobra.Command {
 	return cmd
 }
 
-func updateCommand(client *Client) *cobra.Command {
+func updateCommand() *cobra.Command {
 	var user contracts.User
 
 	cmd := &cobra.Command{
 		Use: "update",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			client := getClient()
+
 			if err := client.UpdateUser(&user); err != nil {
 				return err
 			}
@@ -124,12 +144,14 @@ func updateCommand(client *Client) *cobra.Command {
 	return cmd
 }
 
-func deleteCommand(client *Client) *cobra.Command {
+func deleteCommand() *cobra.Command {
 	var email string
 
 	cmd := &cobra.Command{
 		Use: "delete",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			client := getClient()
+
 			if err := client.DeleteUser(email); err != nil {
 				return err
 			}

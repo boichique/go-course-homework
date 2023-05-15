@@ -17,3 +17,6 @@
 * [http-userroles](http-userroles) - работа с Unix Domain Socket, `boltdb/bolt`, `labstack/echo`, `spf13/cobra`, `go-resty/resty`
 * [sql-querier](sql-querier) - работа с `database/sql`, написание простых sql запросов
 * [http-userroles: follow-up 1](http-userroles) - работа со `swaggo`. Генерация OpenAPI спецификации
+* [http-userroles: follow-up 2](http-userroles) - работа с `pgx` и `Postgres`
+* [http-userroles: follow-up 3](http-userroles) - работа с `HTTPS`
+* [http-userroles: follow-up 4](http-userroles) - практика `docker`
